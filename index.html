@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0c0e13">
+  <meta name="description" content="像素工坊 —— 在浏览器本地把 JPG / PNG 图片变成像素画。自由选择像素尺寸，一键去除背景，导出透明 PNG。">
+  <title>像素工坊 · 把照片变成像素画</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="ambient ambient-one" aria-hidden="true"></div>
+  <div class="ambient ambient-two" aria-hidden="true"></div>
+  <div class="page-grid" aria-hidden="true"></div>
+
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" shape-rendering="crispEdges">
+            <rect x="9" y="1" width="6" height="4" fill="#c9f65d"/>
+            <rect x="5" y="5" width="4" height="4" fill="#c9f65d"/>
+            <rect x="9" y="5" width="6" height="4" fill="#c9f65d"/>
+            <rect x="15" y="5" width="4" height="4" fill="#ff8668"/>
+            <rect x="1" y="9" width="4" height="4" fill="#c9f65d"/>
+            <rect x="5" y="9" width="4" height="4" fill="#c9f65d"/>
+            <rect x="9" y="9" width="6" height="4" fill="#eef8d4"/>
+            <rect x="15" y="9" width="4" height="4" fill="#c9f65d"/>
+            <rect x="19" y="9" width="4" height="4" fill="#c9f65d"/>
+            <rect x="5" y="13" width="4" height="4" fill="#c9f65d"/>
+            <rect x="9" y="13" width="6" height="4" fill="#c9f65d"/>
+            <rect x="15" y="13" width="4" height="4" fill="#7f8da3"/>
+            <rect x="9" y="17" width="6" height="4" fill="#c9f65d"/>
+            <rect x="9" y="21" width="6" height="2" fill="#ff8668"/>
+          </svg>
+        </span>
+        <span class="brand-copy">
+          <strong data-i18n="brandName">像素工坊</strong>
+          <span data-i18n-html="brandSub">PIXEL FORGE <i>/ 01</i></span>
+        </span>
+      </div>
+
+      <div class="header-actions">
+        <span class="privacy-chip" title="所有图片只在当前浏览器本地处理，不会上传" data-i18n-title="privacyTitle">
+          <span class="privacy-dot" aria-hidden="true"></span>
+          <span class="privacy-label-full" data-i18n="privacyFull">本地处理 · 图片不上传</span>
+          <span class="privacy-label-short" data-i18n="privacyShort">本地处理</span>
+        </span>
+        <div class="language-switch" id="languageSwitch" role="group" aria-label="界面语言" data-i18n-aria-label="languageAria" data-lang="zh">
+          <button type="button" class="language-button is-active" data-lang="zh" aria-pressed="true" aria-label="中文" title="中文" lang="zh-CN">中</button>
+          <button type="button" class="language-button" data-lang="en" aria-pressed="false" aria-label="English" title="English" lang="en">EN</button>
+        </div>
+        <button type="button" class="icon-button" id="helpButton" aria-label="打开使用说明" title="使用说明" data-i18n-aria-label="helpButtonAria" data-i18n-title="helpButtonTitle">
+          <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <circle cx="12" cy="12" r="8.25"/>
+            <path d="M9.75 9.2a2.35 2.35 0 1 1 3.2 2.2c-.7.3-.95.8-.95 1.55"/>
+            <path d="M12 16.3v.1"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside class="sidebar" aria-label="像素画设置" data-i18n-aria-label="settingsAria">
+        <div class="sidebar-body">
+          <div class="sidebar-scroll" id="sidebarScroll">
+          <section class="panel-section upload-section">
+            <div class="section-heading">
+              <span class="section-number">01</span>
+              <h2 data-i18n="importTitle">导入图片</h2>
+              <span class="section-meta">JPG / PNG</span>
+            </div>
+
+            <button type="button" class="dropzone" id="dropzone" aria-describedby="uploadHint">
+              <span class="dropzone-empty" id="dropzoneEmpty">
+                <span class="dropzone-icon" aria-hidden="true">
+                  <svg viewBox="0 0 40 40" shape-rendering="crispEdges">
+                    <path d="M7 8h26v24H7z" fill="none" stroke="currentColor" stroke-width="2"/>
+                    <path d="M12 26l6-7 4 4 3-3 4 6z" fill="currentColor" opacity=".9"/>
+                    <rect x="24" y="13" width="4" height="4" fill="currentColor"/>
+                    <rect x="31" y="3" width="3" height="3" fill="#ff8668"/>
+                    <rect x="34" y="6" width="3" height="3" fill="#ff8668"/>
+                  </svg>
+                </span>
+                <span class="dropzone-copy">
+                  <strong data-i18n-html="dropTitleHtml">拖入图片，或<span class="accent-text">点击选择</span></strong>
+                  <small id="uploadHint" data-i18n="uploadHint">支持 JPG / PNG · 单张最大 30 MB</small>
+                </span>
+              </span>
+              <span class="file-card" id="fileCard" hidden>
+                <span class="file-thumb-wrap">
+                  <img class="file-thumb" id="fileThumb" alt="">
+                </span>
+                <span class="file-meta">
+                  <strong id="fileName">图片</strong>
+                  <small id="fileDetail">—</small>
+                </span>
+                <span class="file-replace" data-i18n="replaceImage">更换</span>
+              </span>
+            </button>
+
+            <div class="upload-footer">
+              <button type="button" class="text-button" id="clearButton" hidden data-i18n="clearImage">移除图片</button>
+              <span class="upload-tip" data-i18n-html="pasteTipHtml">也可按 <kbd>Ctrl</kbd> + <kbd>V</kbd> 粘贴</span>
+            </div>
+          </section>
+
+          <section class="panel-section">
+            <div class="section-heading">
+              <span class="section-number">02</span>
+              <h2 data-i18n="sizeTitle">像素尺寸</h2>
+              <span class="section-meta" data-i18n="longestEdge">长边像素</span>
+            </div>
+
+            <div class="preset-grid" id="presetGrid" role="group" aria-label="像素尺寸预设" data-i18n-aria-label="presetGroupAria"></div>
+
+            <div class="inline-field">
+              <label for="sizeInput" data-i18n="customSize">自定义尺寸</label>
+              <span class="unit-input">
+                <input id="sizeInput" type="number" min="8" max="256" step="1" value="64" inputmode="numeric" aria-label="自定义像素尺寸" data-i18n-aria-label="customSizeAria">
+                <span>px</span>
+              </span>
+            </div>
+
+            <input class="range" id="sizeSlider" type="range" min="8" max="256" step="1" value="64" aria-label="调整像素尺寸" data-i18n-aria-label="sizeSliderAria">
+            <div class="range-extremes" aria-hidden="true"><span>8</span><span>256</span></div>
+
+            <div class="readout">
+              <span data-i18n="outputSizeLabel">生成尺寸</span>
+              <strong id="outputDims">64 px 长边</strong>
+            </div>
+          </section>
+
+          <section class="panel-section">
+            <div class="section-heading">
+              <span class="section-number">03</span>
+              <h2 data-i18n="backgroundTitle">背景处理</h2>
+              <span class="section-meta" data-i18n="backgroundMeta">可选</span>
+            </div>
+
+            <button type="button" class="switch-row" id="bgToggle" role="switch" aria-checked="false" disabled>
+              <span class="switch-copy">
+                <strong data-i18n="removeBg">去除背景</strong>
+                <small data-i18n="removeBgHint">自动识别纯色 / 简单背景</small>
+              </span>
+              <span class="switch-track" aria-hidden="true"><span class="switch-knob"></span></span>
+            </button>
+
+            <div class="bg-details" id="bgDetails" hidden>
+              <div class="detect-row">
+                <span class="color-swatch" id="bgSwatch" aria-hidden="true"></span>
+                <span class="detect-copy" id="bgDetect">等待图片</span>
+                <button type="button" class="link-button" id="resetAutoButton" hidden data-i18n="resetAuto">恢复自动</button>
+              </div>
+
+              <div class="slider-heading">
+                <label for="toleranceRange" data-i18n="toleranceLabel">识别容差</label>
+                <output id="toleranceValue" for="toleranceRange">55</output>
+              </div>
+              <input class="range" id="toleranceRange" type="range" min="0" max="100" step="1" value="55" aria-label="背景识别容差" data-i18n-aria-label="toleranceAria">
+              <p class="field-note" data-i18n="toleranceHelp">数值越大，去除范围越广；过高可能误删主体。背景复杂时建议用吸管取色。</p>
+
+              <div class="sample-row">
+                <button type="button" class="secondary-button" id="sampleButton">
+                  <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12.6 7.4l3.3-3.3a1.7 1.7 0 0 0-2.4-2.4l-3.3 3.3"/>
+                    <path d="M10.2 5l4.8 4.8"/>
+                    <path d="M9.1 6.1l-5.6 5.6a2.8 2.8 0 0 0-.8 2l-.2 2.3 2.3-.2a2.8 2.8 0 0 0 2-.8l5.6-5.6z"/>
+                  </svg>
+                  <span id="sampleButtonLabel">吸取背景色</span>
+                </button>
+                <span class="field-note inline-note" data-i18n="sampleHintInline">背景不纯时试试手动取色</span>
+              </div>
+            </div>
+          </section>
+          </div>
+          <button type="button" class="scroll-cue" id="scrollCue" hidden aria-label="向下滚动查看更多设置" data-i18n-aria-label="scrollCueAria">
+            <span data-i18n="scrollCueText">向下滚动 · 更多设置</span>
+            <svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M7 2v9M3.5 7.5L7 11l3.5-3.5"/>
+            </svg>
+          </button>
+        </div>
+
+        <section class="export-section">
+          <div class="section-heading">
+            <span class="section-number">04</span>
+            <h2 data-i18n="exportTitle">导出</h2>
+            <span class="section-meta">PNG</span>
+          </div>
+
+          <div class="export-row">
+            <div class="scale-group" id="scaleGroup" role="group" aria-label="导出倍率" data-i18n-aria-label="exportScaleAria">
+              <button type="button" class="scale-button is-active" data-scale="1" aria-pressed="true">1×</button>
+              <button type="button" class="scale-button" data-scale="2" aria-pressed="false">2×</button>
+              <button type="button" class="scale-button" data-scale="4" aria-pressed="false">4×</button>
+              <button type="button" class="scale-button" data-scale="8" aria-pressed="false">8×</button>
+            </div>
+            <span class="export-dims" id="exportDims">—</span>
+          </div>
+
+          <button type="button" class="download-button" id="downloadButton" disabled>
+            <svg viewBox="0 0 22 22" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M11 3v11"/>
+              <path d="M6.7 9.8L11 14.1l4.3-4.3"/>
+              <path d="M3.5 15.5v2.2h15v-2.2"/>
+            </svg>
+            <span data-i18n="downloadPng">下载 PNG</span>
+            <span class="download-sub" id="downloadSub">—</span>
+          </button>
+          <p class="export-note" id="exportNote">背景移除后，透明区域会保留在 PNG 中。</p>
+        </section>
+      </aside>
+
+      <section class="stage-panel" aria-label="像素画预览" data-i18n-aria-label="stageAria">
+        <div class="stage-toolbar">
+          <div class="view-tabs" role="tablist" aria-label="预览方式" data-i18n-aria-label="viewModeAria">
+            <button type="button" role="tab" class="view-tab is-active" data-view="compare" aria-selected="true" disabled data-i18n="viewCompare">对比</button>
+            <button type="button" role="tab" class="view-tab" data-view="result" aria-selected="false" disabled data-i18n="viewResult">像素画</button>
+            <button type="button" role="tab" class="view-tab" data-view="original" aria-selected="false" disabled data-i18n="viewOriginal">原图</button>
+          </div>
+          <div class="stage-tools">
+            <button type="button" class="tool-button" id="gridButton" aria-pressed="false" disabled>
+              <svg viewBox="0 0 18 18" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+                <path d="M1 6h16M1 12h16M6 1v16M12 1v16"/>
+              </svg>
+              <span data-i18n="gridLabel">像素网格</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="preview-area" id="previewArea">
+          <div class="empty-state" id="emptyState">
+            <div class="empty-art" aria-hidden="true">
+              <svg viewBox="0 0 250 164" shape-rendering="crispEdges">
+                <rect x="26" y="12" width="198" height="132" rx="3" fill="#11151d" stroke="#303947" stroke-width="2"/>
+                <rect x="38" y="24" width="174" height="108" fill="#0d1118"/>
+                <g opacity=".7">
+                  <rect x="52" y="38" width="4" height="4" fill="#5b6c84"/>
+                  <rect x="86" y="30" width="3" height="3" fill="#7888a0"/>
+                  <rect x="178" y="42" width="3" height="3" fill="#7888a0"/>
+                  <rect x="154" y="32" width="4" height="4" fill="#5b6c84"/>
+                  <rect x="64" y="54" width="2" height="2" fill="#5b6c84"/>
+                </g>
+                <g>
+                  <rect x="152" y="42" width="28" height="28" fill="#ff8668"/>
+                  <rect x="148" y="46" width="36" height="20" fill="#ff8668"/>
+                  <rect x="156" y="38" width="20" height="4" fill="#ffb16a"/>
+                  <rect x="148" y="50" width="4" height="12" fill="#ffb16a"/>
+                  <rect x="152" y="66" width="28" height="4" fill="#d86552"/>
+                </g>
+                <g>
+                  <path d="M38 104h20V96h16v-8h16v-8h12v8h16v8h18v8h20v8h20v16H38z" fill="#263d47"/>
+                  <path d="M38 112h28v-8h16v-8h12v8h16v8h26v8h30v12H38z" fill="#1f4f4f"/>
+                  <path d="M38 120h34v-8h18v8h24v8h38v12H38z" fill="#2c6654"/>
+                </g>
+                <g>
+                  <rect x="38" y="122" width="174" height="10" fill="#1b2a2f"/>
+                  <rect x="46" y="126" width="6" height="3" fill="#c9f65d"/>
+                  <rect x="64" y="129" width="3" height="3" fill="#6b8f53"/>
+                  <rect x="92" y="124" width="6" height="3" fill="#44684a"/>
+                  <rect x="128" y="129" width="4" height="3" fill="#c9f65d"/>
+                  <rect x="166" y="125" width="4" height="4" fill="#6b8f53"/>
+                  <rect x="188" y="129" width="3" height="3" fill="#c9f65d"/>
+                </g>
+                <g>
+                  <rect x="203" y="19" width="13" height="3" fill="#c9f65d"/>
+                  <rect x="208" y="14" width="3" height="13" fill="#c9f65d"/>
+                  <rect x="18" y="119" width="8" height="3" fill="#ff8668"/>
+                  <rect x="21" y="116" width="2" height="9" fill="#ff8668"/>
+                </g>
+                <g>
+                  <rect x="198" y="137" width="38" height="15" fill="#161c25" stroke="#2c3542" stroke-width="1.5"/>
+                  <rect x="204" y="142" width="3" height="3" fill="#c9f65d"/>
+                  <rect x="211" y="142" width="12" height="3" fill="#4f5c6d"/>
+                </g>
+              </svg>
+            </div>
+            <p class="empty-eyebrow">DROP · PIXELIZE · EXPORT</p>
+            <h1 data-i18n-html="emptyTitleHtml">把照片，变成<br><span>像素艺术。</span></h1>
+            <p class="empty-description" data-i18n-html="emptyDescriptionHtml">拖入一张 JPG 或 PNG 图片，选择想要的像素尺寸。<br>还可以一键去掉背景，导出透明 PNG。</p>
+            <button type="button" class="empty-cta" id="emptyUpload">
+              <svg viewBox="0 0 20 20" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="4" width="14" height="12" rx="1.5"/>
+                <circle cx="7.5" cy="8" r="1.2" fill="currentColor" stroke="none"/>
+                <path d="M4 14l4.2-4 3.1 3 2.1-2 2.8 3"/>
+              </svg>
+              <span data-i18n="chooseImage">选择一张图片</span>
+            </button>
+            <p class="empty-footnote" data-i18n="emptyFootnote">所有运算都在你的浏览器中完成</p>
+          </div>
+
+          <div class="stage-area" id="stageArea" hidden>
+            <div class="stage-frame" id="stageFrame" data-view="compare">
+              <img class="stage-image" id="originalImage" alt="原图预览" data-i18n-alt="originalPreviewAlt">
+              <div class="result-layer" id="resultLayer">
+                <canvas class="result-canvas" id="resultCanvas" role="img" aria-label="像素画结果预览" data-i18n-aria-label="canvasPreviewAria"></canvas>
+                <div class="pixel-grid-overlay" id="pixelGrid" hidden aria-hidden="true"></div>
+              </div>
+              <div class="split-line" id="splitLine" hidden>
+                <div class="split-handle" id="splitHandle" role="slider" tabindex="0" aria-label="原图与像素画对比位置" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" data-i18n-aria-label="splitAria">
+                  <svg viewBox="0 0 18 18" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M7 4L3.5 9 7 14M11 4l3.5 5-3.5 5"/>
+                  </svg>
+                </div>
+              </div>
+              <span class="stage-label stage-label-left" id="originalLabel" data-i18n="originalLabel">原图</span>
+              <span class="stage-label stage-label-right" id="resultLabel"><span data-i18n="resultLabel">像素画</span> <b id="resultLabelSize">64</b></span>
+              <div class="sampling-banner" id="samplingBanner" hidden>
+                <span class="sampling-dot" aria-hidden="true"></span>
+                <span data-i18n="samplingInstruction">点击图片中的背景区域取色</span>
+                <button type="button" id="cancelSampleButton" class="sampling-cancel" data-i18n="cancel">取消</button>
+              </div>
+              <p class="stage-hint" id="stageHint">拖动分割线，对比处理前后</p>
+            </div>
+          </div>
+
+          <div class="processing-overlay" id="processingOverlay" hidden role="status" aria-live="polite">
+            <div class="loader-pixels" aria-hidden="true">
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+            <span id="processingText" data-i18n="processingGenerating">正在生成像素画…</span>
+          </div>
+        </div>
+
+        <footer class="stage-footer">
+          <div class="stat">
+            <span data-i18n="statOriginal">原图</span>
+            <strong id="statSource">等待导入</strong>
+          </div>
+          <div class="stat">
+            <span data-i18n="statOutput">输出</span>
+            <strong id="statOutput">—</strong>
+          </div>
+          <div class="stat">
+            <span data-i18n="statColors">颜色</span>
+            <strong id="statColors">—</strong>
+          </div>
+          <div class="stat">
+            <span data-i18n="statTransparent">透明</span>
+            <strong id="statAlpha">—</strong>
+          </div>
+          <span class="local-badge">
+            <span class="local-dot" aria-hidden="true"></span>
+            LOCAL / PRIVATE
+          </span>
+        </footer>
+      </section>
+    </main>
+  </div>
+
+  <input type="file" id="fileInput" accept=".jpg,.jpeg,.png,image/jpeg,image/png" hidden>
+
+  <div class="drop-overlay" id="dropOverlay" aria-hidden="true" hidden>
+    <div class="drop-overlay-inner">
+      <span class="drop-overlay-glyph" aria-hidden="true">
+        <svg viewBox="0 0 48 48" shape-rendering="crispEdges">
+          <path d="M8 10h32v28H8z" fill="none" stroke="currentColor" stroke-width="2.5"/>
+          <path d="M15 32l8-10 5 5 4-4 5 9z" fill="currentColor"/>
+          <rect x="29" y="16" width="5" height="5" fill="currentColor"/>
+        </svg>
+      </span>
+      <strong data-i18n="dropOverlayTitle">松手，开始像素化</strong>
+      <span data-i18n="dropOverlaySub">支持 JPG / PNG · 图片不会被上传</span>
+    </div>
+  </div>
+
+  <div class="toast-stack" id="toastStack" role="status" aria-live="polite"></div>
+
+  <dialog class="help-dialog" id="helpDialog" aria-labelledby="helpTitle">
+    <div class="dialog-top">
+      <span class="dialog-kicker">PIXEL FORGE / GUIDE</span>
+      <form method="dialog">
+        <button type="submit" class="dialog-close" aria-label="关闭使用说明" data-i18n-aria-label="helpCloseAria">
+          <svg viewBox="0 0 18 18" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+            <path d="M4 4l10 10M14 4L4 14"/>
+          </svg>
+        </button>
+      </form>
+    </div>
+    <h2 id="helpTitle" data-i18n="helpTitle">三步，把照片变成像素画</h2>
+    <p class="dialog-lead" data-i18n="helpLead">不用安装插件，也不用上传图片。所有处理都在当前浏览器标签页里完成。</p>
+
+    <ol class="guide-list">
+      <li>
+        <span class="guide-number">01</span>
+        <div><strong data-i18n="helpStep1Title">导入图片</strong><p data-i18n="helpStep1Text">拖入、点击选择，或直接按 Ctrl + V 粘贴一张 JPG / PNG 图片。</p></div>
+      </li>
+      <li>
+        <span class="guide-number">02</span>
+        <div><strong data-i18n="helpStep2Title">选择像素尺寸</strong><p data-i18n="helpStep2Text">“长边像素”决定最终图形最长边的像素数量。例如 64 会把图片转换成 64×N 或 N×64 的像素画。</p></div>
+      </li>
+      <li>
+        <span class="guide-number">03</span>
+        <div><strong data-i18n="helpStep3Title">去背景并导出</strong><p data-i18n="helpStep3Text">打开“去除背景”，调整容差，或使用吸管点击背景取色。最后下载透明背景的 PNG。</p></div>
+      </li>
+    </ol>
+
+    <div class="dialog-tip">
+      <span class="tip-mark">TIP</span>
+      <p data-i18n-html="helpTipHtml"><strong>背景去除适合纯色或简单背景。</strong>背景越复杂，越建议先用吸管点选主要背景色，再微调容差；必要时降低容差以保留主体。对比视图里可以拖动中线查看效果。</p>
+    </div>
+
+    <div class="dialog-shortcuts">
+      <span data-i18n-html="helpShortcutDrag"><kbd>拖拽</kbd> 替换图片</span>
+      <span data-i18n-html="helpShortcutPaste"><kbd>Ctrl</kbd> + <kbd>V</kbd> 粘贴图片</span>
+      <span data-i18n-html="helpShortcutDownload"><kbd>Ctrl</kbd> + <kbd>S</kbd> 下载 PNG</span>
+      <span data-i18n-html="helpShortcutEsc"><kbd>Esc</kbd> 取消取色</span>
+    </div>
+
+    <form method="dialog" class="dialog-footer">
+      <button type="submit" class="dialog-primary" data-i18n="startCreating">开始创作</button>
+    </form>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
